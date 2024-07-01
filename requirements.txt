@@ -1,0 +1,6 @@
+Flask
+spotipy
+requests
+Pillow
+python-dotenv
+gunicorn
