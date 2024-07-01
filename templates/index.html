@@ -8,6 +8,10 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <script>
       function showLoading() {
         document.getElementById("loading").style.display = "block";
@@ -21,27 +25,97 @@
     </script>
   </head>
   <body>
-    <div id="instructions">
-      <h1>ジャケットコラ太郎</h1>
-      <div>◎使い方◎</div>
-      <ol>
-        <li>
-          Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
-        </li>
-        <li>コピーしたURLを下の入力欄に貼り付けます。</li>
-        <li>「作成する」ボタンを押します。</li>
-        <li>コラージュ画像が生成されて表示されます。</li>
-      </ol>
+    <div id="container">
+      <header>
+        <img
+          src="{{ url_for('static', filename='logo.png') }}"
+          alt="ジャケットコラ太郎ロゴ"
+          class="logo"
+        />
+      </header>
+      <main>
+        <section id="instructions">
+          <h1>ジャケットコラ太郎</h1>
+          <p>◎使い方◎</p>
+          <ol>
+            <li>
+              Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
+            </li>
+            <li>コピーしたURLを下の入力欄に貼り付けます。</li>
+            <li>「作成する」ボタンを押します。</li>
+            <li>コラージュ画像が生成されて表示されます。</li>
+          </ol>
+        </section>
+        <section id="form-section">
+          <form method="POST" onsubmit="showLoading()">
+            <label for="playlist_url">プレイリストのURLを入力してね。</label>
+            <input type="text" id="playlist_url" name="playlist_url" required />
+            <div class="radio-group">
+              <div>
+                <input
+                  type="radio"
+                  id="shuffle"
+                  name="sort_by"
+                  value="shuffle"
+                  {%
+                  if
+                  shuffle
+                  %}checked{%
+                  endif
+                  %}
+                />
+                <label for="shuffle">ランダムに並び替える</label>
+              </div>
+              <div>
+                <input type="radio" id="sort_artist" name="sort_by"
+                value="artist" {% if selected_sort_by == 'artist' %}checked{%
+                endif %}>
+                <label for="sort_artist">アーティスト名順</label>
+              </div>
+              <div>
+                <input type="radio" id="sort_album_release_date" name="sort_by"
+                value="album_release_date" {% if selected_sort_by ==
+                'album_release_date' %}checked{% endif %}>
+                <label for="sort_album_release_date"
+                  >アルバムリリース日順</label
+                >
+              </div>
+              <div>
+                <input type="radio" id="sort_track_name" name="sort_by"
+                value="track_name" {% if selected_sort_by == 'track_name'
+                %}checked{% endif %}>
+                <label for="sort_track_name">トラック名順</label>
+              </div>
+              <div class="check">
+                <input
+                  type="checkbox"
+                  id="remove_duplicates"
+                  name="remove_duplicates"
+                  {%
+                  if
+                  remove_duplicates
+                  %}checked{%
+                  endif
+                  %}
+                />
+                <label for="remove_duplicates">重複を除く</label>
+              </div>
+            </div>
+            <button type="submit" class="fancy-button">作成する</button>
+          </form>
+        </section>
+        <div id="loading-background"></div>
+        <div id="loading">作成中・・・</div>
+        {% if mosaic_image_url %}
+        <section id="output-section">
+          <img
+            src="{{ mosaic_image_url }}"
+            alt="Collage Image"
+            class="output-img"
+          />
+        </section>
+        {% endif %}
+      </main>
     </div>
-    <form method="POST" onsubmit="showLoading()">
-      <label for="playlist_url">SpotifyプレイリストのURLを入力してね。</label>
-      <input type="text" id="playlist_url" name="playlist_url" required />
-      <button type="submit">作成する</button>
-    </form>
-    <div id="loading-background"></div>
-    <div id="loading">作成中・・・</div>
-    {% if mosaic_image_url %}
-    <img src="{{ mosaic_image_url }}" alt="Collage Image" />
-    {% endif %}
   </body>
 </html>
