@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spotifyプレイリストコラージュ</title>
+    <title>ジャケットコラ太郎</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -23,21 +23,23 @@
   <body>
     <div id="instructions">
       <h1>ジャケットコラ太郎</h1>
-      <div>◎使い方</div>
+      <div>◎使い方◎</div>
       <ol>
-        <li>Spotifyでコラージュを作りたいプレイリストのURLをコピーします。</li>
+        <li>
+          Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
+        </li>
         <li>コピーしたURLを下の入力欄に貼り付けます。</li>
-        <li>「コラージュ生成」ボタンを押します。</li>
+        <li>「作成する」ボタンを押します。</li>
         <li>コラージュ画像が生成されて表示されます。</li>
       </ol>
     </div>
     <form method="POST" onsubmit="showLoading()">
       <label for="playlist_url">SpotifyプレイリストのURLを入力してね。</label>
       <input type="text" id="playlist_url" name="playlist_url" required />
-      <button type="submit">コラージュ生成</button>
+      <button type="submit">作成する</button>
     </form>
     <div id="loading-background"></div>
-    <div id="loading">作成中...</div>
+    <div id="loading">作成中・・・</div>
     {% if mosaic_image_url %}
     <img src="{{ mosaic_image_url }}" alt="Collage Image" />
     {% endif %}
