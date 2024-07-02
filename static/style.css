@@ -31,7 +31,8 @@ header {
     height: auto;
 }
 
-h1 {
+h1,
+h2 {
     color: #333;
     margin-bottom: 10px;
     font-size: 24px;
@@ -40,6 +41,10 @@ h1 {
 p {
     font-size: 18px;
     color: #666;
+}
+
+ol {
+    list-style-position: inside;
 }
 
 li {
@@ -104,6 +109,15 @@ input[type="text"] {
 .fancy-button:hover {
     background-color: #0056b3;
     transform: translateY(-2px);
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 .output-img {

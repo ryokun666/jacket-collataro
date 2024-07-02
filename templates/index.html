@@ -109,6 +109,14 @@
         <div id="loading">作成中・・・</div>
         {% if mosaic_image_url %}
         <section id="output-section">
+          <h2>プレイリスト情報</h2>
+          <p>
+            <strong>プレイリスト名:</strong>
+            <a href="{{ playlist_link }}" target="_blank"
+              >{{ playlist_name }}</a
+            >
+          </p>
+          <p><strong>作成者:</strong> {{ playlist_owner }}</p>
           <img
             src="{{ mosaic_image_url }}"
             alt="Collage Image"

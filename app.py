@@ -30,6 +30,13 @@ def get_playlist_images(playlist_url, remove_duplicates=False):
     # プレイリストIDを抽出
     playlist_id = playlist_url.split("/")[-1].split("?")[0]
 
+    # プレイリストの詳細を取得
+    playlist_details = sp.playlist(playlist_id)
+    playlist_name = playlist_details['name']
+    playlist_description = playlist_details['description']
+    playlist_owner = playlist_details['owner']['display_name']
+    playlist_link = playlist_details['external_urls']['spotify']
+    
     # プレイリストのトラックを取得
     results = sp.playlist_tracks(playlist_id)
     tracks = results['items']
@@ -65,7 +72,7 @@ def get_playlist_images(playlist_url, remove_duplicates=False):
         img = img.resize((300, 300))  # サイズは適宜調整してください
         images.append((img, data))
 
-    return images
+    return images, playlist_name, playlist_description, playlist_owner, playlist_link
 
 def create_square_mosaic(images, shuffle=False, sort_by=None):
     if shuffle:
@@ -94,24 +101,29 @@ def create_square_mosaic(images, shuffle=False, sort_by=None):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     selected_sort_by = None
+    playlist_name = None
+    playlist_description = None
+    playlist_owner = None
+    playlist_link = None
+
     if request.method == 'POST':
         playlist_url = request.form['playlist_url']
         shuffle = 'shuffle' in request.form
         sort_by = request.form.get('sort_by', None)
         remove_duplicates = 'remove_duplicates' in request.form
-        images = get_playlist_images(playlist_url, remove_duplicates)
+        images, playlist_name, playlist_description, playlist_owner, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
         mosaic_image = create_square_mosaic(images, shuffle, sort_by)
         mosaic_image_path = 'static/mosaic_image.jpg'
         mosaic_image.save(mosaic_image_path)
         selected_sort_by = sort_by
-        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, selected_sort_by=selected_sort_by, shuffle=shuffle, remove_duplicates=remove_duplicates))
+        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, selected_sort_by=selected_sort_by, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
         return response
 
     # GETリクエスト時のキャッシュ削除ヘッダーの設定
-    response = make_response(render_template('index.html', mosaic_image_url=None, selected_sort_by=selected_sort_by, shuffle=False, remove_duplicates=False))
+    response = make_response(render_template('index.html', mosaic_image_url=None, selected_sort_by=selected_sort_by, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
