@@ -144,6 +144,10 @@ input[type="text"] {
     text-align: left;
 }
 
+#instructions p {
+    text-align: center;
+}
+
 @media (max-width: 600px) {
     body {
         padding: 20px;
