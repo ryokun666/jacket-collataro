@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ジャケットコラ太郎</title>
     <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
     <script>
@@ -24,21 +20,26 @@
       };
     </script>
   </head>
-  <body>
-    <div id="container">
-      <header>
+  <body
+    class="bg-gray-100 flex justify-center items-center flex-col text-center py-5"
+  >
+    <div
+      id="container"
+      class="w-full max-w-2xl p-5 bg-white rounded-lg shadow-lg overflow-hidden"
+    >
+      <header class="mb-5 text-center">
         <h1>
           <img
             src="{{ url_for('static', filename='logo.png') }}"
             alt="ジャケットコラ太郎ロゴ"
-            class="logo"
+            class="max-w-xs w-full h-auto mx-auto"
           />
         </h1>
       </header>
       <main>
-        <section id="instructions">
-          <p>◎使い方◎</p>
-          <ol>
+        <section id="instructions" class="mb-5 text-left">
+          <p class="text-center">◎使い方◎</p>
+          <ol class="list-inside list-decimal">
             <li>
               Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
             </li>
@@ -47,16 +48,29 @@
             <li>コラージュ画像が生成されて表示されます。</li>
           </ol>
         </section>
-        <section id="form-section">
-          <form method="POST" onsubmit="showLoading()">
-            <label for="playlist_url">プレイリストのURLを入力してね。</label>
-            <input type="text" id="playlist_url" name="playlist_url" required />
-            <div class="radio-group">
+        <section id="form-section" class="bg-gray-50 p-5 rounded-lg shadow-md">
+          <form
+            method="POST"
+            onsubmit="showLoading()"
+            class="flex flex-col items-center w-full"
+          >
+            <label for="playlist_url" class="font-bold text-gray-600 mb-2"
+              >プレイリストのURLを入力してね。</label
+            >
+            <input
+              type="text"
+              id="playlist_url"
+              name="playlist_url"
+              required
+              class="w-full p-3 mb-5 border border-gray-300 rounded-md text-lg"
+            />
+            <div class="radio-group text-left w-full mb-3">
               <div>
                 <input
                   type="checkbox"
                   id="shuffle"
                   name="shuffle"
+                  class="mr-2"
                   {%
                   if
                   shuffle
@@ -64,13 +78,16 @@
                   endif
                   %}
                 />
-                <label for="shuffle">ランダムに並び替える</label>
+                <label for="shuffle" class="text-gray-700"
+                  >ランダムに並び替える</label
+                >
               </div>
-              <div class="check">
+              <div class="check mt-4">
                 <input
                   type="checkbox"
                   id="remove_duplicates"
                   name="remove_duplicates"
+                  class="mr-2"
                   {%
                   if
                   remove_duplicates
@@ -78,21 +95,39 @@
                   endif
                   %}
                 />
-                <label for="remove_duplicates">重複を除く</label>
+                <label for="remove_duplicates" class="text-gray-700"
+                  >重複を除く</label
+                >
               </div>
             </div>
-
-            <button type="submit" class="fancy-button">作成する</button>
+            <button
+              type="submit"
+              class="fancy-button px-5 py-3 mt-4 bg-blue-600 text-white rounded-full text-lg shadow-md transition-transform transform hover:bg-blue-700 hover:-translate-y-1"
+            >
+              作成する
+            </button>
           </form>
         </section>
-        <div id="loading-background"></div>
-        <div id="loading">作成中・・・</div>
+        <div
+          id="loading-background"
+          class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden"
+        ></div>
+        <div
+          id="loading"
+          class="fixed inset-0 flex items-center justify-center h-screen text-white text-4xl font-bold z-20 hidden"
+        >
+          作成中・・・
+        </div>
+
         {% if mosaic_image_url %}
-        <section id="output-section">
-          <h2>プレイリスト情報</h2>
+        <section id="output-section" class="mt-5">
+          <h2 class="text-2xl text-gray-700 mb-2">プレイリスト情報</h2>
           <p>
             <strong>プレイリスト名:</strong>
-            <a href="{{ playlist_link }}" target="_blank"
+            <a
+              href="{{ playlist_link }}"
+              target="_blank"
+              class="text-blue-600 hover:underline"
               >{{ playlist_name }}</a
             >
           </p>
@@ -100,7 +135,7 @@
           <img
             src="{{ mosaic_image_url }}"
             alt="Collage Image"
-            class="output-img"
+            class="output-img mt-5 border border-gray-300 rounded-lg shadow-md max-w-xs w-full h-auto mx-auto"
           />
         </section>
         {% endif %}
