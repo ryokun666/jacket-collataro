@@ -128,15 +128,9 @@ def get_playlist_images(playlist_url, remove_duplicates=False):
         return [], None, None, None, None
 
 
-def create_square_mosaic(images, shuffle=False, sort_by=None):
+def create_square_mosaic(images, shuffle=False):
     if shuffle:
         random.shuffle(images)
-    elif sort_by == 'artist':
-        images.sort(key=lambda x: x[1]['artist'])
-    elif sort_by == 'album_release_date':
-        images.sort(key=lambda x: x[1]['album_release_date'])
-    elif sort_by == 'track_name':
-        images.sort(key=lambda x: x[1]['track_name'])
     
     num_images = len(images)
     num_cols = int(math.sqrt(num_images))
@@ -152,9 +146,9 @@ def create_square_mosaic(images, shuffle=False, sort_by=None):
 
     return mosaic
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    selected_sort_by = None
     playlist_name = None
     playlist_description = None
     playlist_owner = None
@@ -162,22 +156,19 @@ def index():
 
     if request.method == 'POST':
         playlist_url = request.form['playlist_url']
-        shuffle = 'shuffle' in request.form
-        sort_by = request.form.get('sort_by', None)
+        shuffle = 'shuffle' in request.form 
         remove_duplicates = 'remove_duplicates' in request.form
         images, playlist_name, playlist_description, playlist_owner, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
-        mosaic_image = create_square_mosaic(images, shuffle, sort_by)
+        mosaic_image = create_square_mosaic(images, shuffle)
         mosaic_image_path = 'static/mosaic_image.jpg'
         mosaic_image.save(mosaic_image_path)
-        selected_sort_by = sort_by
-        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, selected_sort_by=selected_sort_by, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
+        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
         return response
 
-    # GETリクエスト時のキャッシュ削除ヘッダーの設定
-    response = make_response(render_template('index.html', mosaic_image_url=None, selected_sort_by=selected_sort_by, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
+    response = make_response(render_template('index.html', mosaic_image_url=None, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'

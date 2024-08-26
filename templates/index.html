@@ -54,10 +54,9 @@
             <div class="radio-group">
               <div>
                 <input
-                  type="radio"
+                  type="checkbox"
                   id="shuffle"
-                  name="sort_by"
-                  value="shuffle"
+                  name="shuffle"
                   {%
                   if
                   shuffle
@@ -66,26 +65,6 @@
                   %}
                 />
                 <label for="shuffle">ランダムに並び替える</label>
-              </div>
-              <div>
-                <input type="radio" id="sort_artist" name="sort_by"
-                value="artist" {% if selected_sort_by == 'artist' %}checked{%
-                endif %}>
-                <label for="sort_artist">アーティスト名順</label>
-              </div>
-              <div>
-                <input type="radio" id="sort_album_release_date" name="sort_by"
-                value="album_release_date" {% if selected_sort_by ==
-                'album_release_date' %}checked{% endif %}>
-                <label for="sort_album_release_date"
-                  >アルバムリリース日順</label
-                >
-              </div>
-              <div>
-                <input type="radio" id="sort_track_name" name="sort_by"
-                value="track_name" {% if selected_sort_by == 'track_name'
-                %}checked{% endif %}>
-                <label for="sort_track_name">トラック名順</label>
               </div>
               <div class="check">
                 <input
@@ -102,6 +81,7 @@
                 <label for="remove_duplicates">重複を除く</label>
               </div>
             </div>
+
             <button type="submit" class="fancy-button">作成する</button>
           </form>
         </section>
