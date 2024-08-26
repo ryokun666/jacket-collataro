@@ -27,52 +27,106 @@ if os.path.exists(mosaic_image_path):
     os.remove(mosaic_image_path)
 
 def get_playlist_images(playlist_url, remove_duplicates=False):
-    # プレイリストIDを抽出
-    playlist_id = playlist_url.split("/")[-1].split("?")[0]
+    try:
+        playlist_id = playlist_url.split("/")[-1].split("?")[0]
+        playlist_details = sp.playlist(playlist_id)
+        playlist_name = playlist_details['name']
+        playlist_description = playlist_details['description']
+        playlist_owner = playlist_details['owner']['display_name']
+        playlist_link = playlist_details['external_urls']['spotify']
 
-    # プレイリストの詳細を取得
-    playlist_details = sp.playlist(playlist_id)
-    playlist_name = playlist_details['name']
-    playlist_description = playlist_details['description']
-    playlist_owner = playlist_details['owner']['display_name']
-    playlist_link = playlist_details['external_urls']['spotify']
+        limit = 100  # ここで取得するトラック数を制限
+        offset = 0
+        tracks = []
+        while True:
+            results = sp.playlist_tracks(playlist_id, limit=limit, offset=offset)
+            if not results['items']:
+                break
+            tracks.extend(results['items'])
+            offset += limit
+
+        image_data = []
+        seen_urls = set()
+
+        for item in tracks:
+            track = item['track']
+            if track['album']['images']:
+                url = track['album']['images'][0]['url']
+                if remove_duplicates and url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                image_data.append({
+                    'url': url,
+                    'artist': track['album']['artists'][0]['name'],
+                    'album_release_date': track['album']['release_date'],
+                    'track_name': track['name']
+                })
+
+        images = []
+        for data in image_data:
+            response = requests.get(data['url'])
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((300, 300))
+            images.append((img, data))
+
+        return images, playlist_name, playlist_description, playlist_owner, playlist_link
     
-    # プレイリストのトラックを取得
-    results = sp.playlist_tracks(playlist_id)
-    tracks = results['items']
+    except Exception as e:
+        print(f"Error: {e}")
+        return [], None, None, None, None
 
-    # 画像とメタデータのリスト
-    image_data = []
+    try:
+        # プレイリストIDを抽出
+        playlist_id = playlist_url.split("/")[-1].split("?")[0]
 
-    seen_urls = set()  # 重複を除くためのセット
+        # プレイリストの詳細を取得
+        playlist_details = sp.playlist(playlist_id)
+        playlist_name = playlist_details['name']
+        playlist_description = playlist_details['description']
+        playlist_owner = playlist_details['owner']['display_name']
+        playlist_link = playlist_details['external_urls']['spotify']
+        
+        # プレイリストのトラックを取得
+        results = sp.playlist_tracks(playlist_id)
+        tracks = results['items']
 
-    while results['next']:
-        results = sp.next(results)
-        tracks.extend(results['items'])
+        # 画像とメタデータのリスト
+        image_data = []
 
-    for item in tracks:
-        track = item['track']
-        if track['album']['images']:
-            url = track['album']['images'][0]['url']
-            if remove_duplicates and url in seen_urls:
-                continue
-            seen_urls.add(url)
-            image_data.append({
-                'url': url,
-                'artist': track['album']['artists'][0]['name'],
-                'album_release_date': track['album']['release_date'],
-                'track_name': track['name']
-            })
+        seen_urls = set()  # 重複を除くためのセット
 
-    # 画像のダウンロードと正方形画像への加工
-    images = []
-    for data in image_data:
-        response = requests.get(data['url'])
-        img = Image.open(BytesIO(response.content))
-        img = img.resize((300, 300))  # サイズは適宜調整してください
-        images.append((img, data))
+        while results['next']:
+            results = sp.next(results)
+            tracks.extend(results['items'])
 
-    return images, playlist_name, playlist_description, playlist_owner, playlist_link
+        for item in tracks:
+            track = item['track']
+            if track['album']['images']:
+                url = track['album']['images'][0]['url']
+                if remove_duplicates and url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                image_data.append({
+                    'url': url,
+                    'artist': track['album']['artists'][0]['name'],
+                    'album_release_date': track['album']['release_date'],
+                    'track_name': track['name']
+                })
+
+        # 画像のダウンロードと正方形画像への加工
+        images = []
+        for data in image_data:
+            response = requests.get(data['url'])
+            img = Image.open(BytesIO(response.content))
+            img = img.resize((300, 300))  # サイズは適宜調整してください
+            images.append((img, data))
+
+        return images, playlist_name, playlist_description, playlist_owner, playlist_link
+    
+    except Exception as e:
+        print(f"Error: {e}")
+        return [], None, None, None, None
+
 
 def create_square_mosaic(images, shuffle=False, sort_by=None):
     if shuffle:
