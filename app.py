@@ -10,6 +10,7 @@ from flask import Flask, request, render_template, make_response, jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from app.models import db, PlaylistImage 
+from flask_migrate import Migrate  # 追加
 
 # .envファイルを読み込む
 load_dotenv()
@@ -24,6 +25,9 @@ sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, 
 app = Flask(__name__)
 app.config.from_object('config.Config')
 db.init_app(app)
+
+# Flask-Migrateの設定
+migrate = Migrate(app, db)
 
 # UUIDを使ってユニークな画像パスを作成する関数
 def generate_unique_image_path():
@@ -166,6 +170,10 @@ def index():
     response.headers['Expires'] = '0'
     return response
 
-
 if __name__ == '__main__':
+    # アプリケーション起動時に自動的にマイグレーションを適用する
+    with app.app_context():
+        from flask_migrate import upgrade
+        upgrade()
+
     app.run(debug=True)
