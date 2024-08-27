@@ -9,6 +9,8 @@ spotipy = "*"
 requests = "*"
 pillow = "*"
 python-dotenv = "*"
+flask-migrate = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, render_template, make_response
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from app.models import db, PlaylistImage  # models.pyからインポート
 
 # .envファイルを読み込む
 load_dotenv()
@@ -20,6 +21,8 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
 app = Flask(__name__)
+app.config.from_object('config.Config')
+db.init_app(app)
 
 # アプリケーション起動時にmosaic_image.jpgを削除
 mosaic_image_path = 'static/mosaic_image.jpg'
@@ -146,7 +149,6 @@ def create_square_mosaic(images, shuffle=False):
 
     return mosaic
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     playlist_name = None
@@ -162,6 +164,17 @@ def index():
         mosaic_image = create_square_mosaic(images, shuffle)
         mosaic_image_path = 'static/mosaic_image.jpg'
         mosaic_image.save(mosaic_image_path)
+        
+        # データベースに保存
+        playlist_image = PlaylistImage(
+            playlist_name=playlist_name,
+            playlist_link=playlist_link,
+            playlist_owner=playlist_owner,
+            image_url=mosaic_image_path  # 生成された画像のURL
+        )
+        db.session.add(playlist_image)
+        db.session.commit()
+        
         response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'

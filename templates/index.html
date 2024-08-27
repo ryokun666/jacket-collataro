@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ジャケットコラ太郎</title>
+
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+      type="image/x-icon"
+    />
+
     <link
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
       rel="stylesheet"
@@ -45,6 +52,16 @@
               <li>コラージュ画像が生成されて表示されます。</li>
             </ol>
           </details>
+          <!-- お問い合わせフォームへのリンクを追加 -->
+          <div class="has-text-centered mt-5 mb-5">
+            <a
+              href="https://forms.gle/8NnhvSUX2HwvVX8p6"
+              class="button is-link is-outlined"
+              target="_blank"
+            >
+              お問い合わせ
+            </a>
+          </div>
           <section id="form-section" class="box has-background-white-ter mb-5">
             <form method="POST" onsubmit="showLoading()">
               <div class="field">
@@ -130,16 +147,33 @@
             </figure>
           </section>
           {% endif %}
-          <!-- お問い合わせフォームへのリンクを追加 -->
-          <div class="has-text-centered mt-5">
-            <a
-              href="https://forms.gle/8NnhvSUX2HwvVX8p6"
-              class="button is-link is-outlined"
-              target="_blank"
-            >
-              お問い合わせ
-            </a>
-          </div>
+
+          <section id="recent-images" class="box has-background-white-ter mb-5">
+            <h2 class="title is-4">直近の生成画像</h2>
+            {% if recent_images %}
+            <ul>
+              {% for image in recent_images %}
+              <li>
+                <strong>プレイリスト名:</strong>
+                <a href="{{ image.playlist_link }}" target="_blank"
+                  >{{ image.playlist_name }}</a
+                >
+                <br />
+                <strong>作成者:</strong> {{ image.playlist_owner }}
+                <br />
+                <img
+                  src="{{ image.image_url }}"
+                  alt="Generated Image"
+                  class="box"
+                  style="width: 100%; height: auto; margin-top: 10px"
+                />
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p>まだ画像が生成されていません。</p>
+            {% endif %}
+          </section>
         </main>
       </div>
     </div>
