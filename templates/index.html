@@ -7,20 +7,48 @@
 
     <link
       rel="icon"
-      href="{{ url_for('static', filename='favicon.ico') }}"
+      href="{{ url_for('static', filename='favicon.ico') }}?v=2"
       type="image/x-icon"
     />
-
     <link
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
       rel="stylesheet"
     />
+
     <script>
       function showLoading() {
         const button = document.querySelector('button[type="submit"]');
         button.classList.add("is-loading");
         button.disabled = true;
         button.textContent = "作成中...";
+      }
+
+      function loadMore() {
+        const button = document.getElementById("load-more-btn");
+        const offset = button.getAttribute("data-offset");
+
+        fetch(`/load_more_images?offset=${offset}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const list = document.getElementById("recent-images-list");
+            data.images.forEach((image) => {
+              const listItem = document.createElement("li");
+              listItem.innerHTML = `
+                <strong>プレイリスト名:</strong>
+                <a href="${image.playlist_link}" target="_blank">${image.playlist_name}</a><br />
+                <strong>作成者:</strong>
+                <a href="${image.playlist_owner_link}" target="_blank">${image.playlist_owner}</a><br />
+                <img src="${image.image_url}" alt="Generated Image" class="box" style="width: 100%; height: auto; margin-top: 10px" />
+              `;
+              list.appendChild(listItem);
+            });
+
+            if (!data.has_more) {
+              button.style.display = "none";
+            } else {
+              button.setAttribute("data-offset", parseInt(offset) + 5);
+            }
+          });
       }
     </script>
   </head>
@@ -52,15 +80,13 @@
               <li>コラージュ画像が生成されて表示されます。</li>
             </ol>
           </details>
-          <!-- お問い合わせフォームへのリンクを追加 -->
           <div class="has-text-centered mt-5 mb-5">
             <a
               href="https://forms.gle/8NnhvSUX2HwvVX8p6"
               class="button is-link is-outlined"
               target="_blank"
+              >お問い合わせ</a
             >
-              お問い合わせ
-            </a>
           </div>
           <section id="form-section" class="box has-background-white-ter mb-5">
             <form method="POST" onsubmit="showLoading()">
@@ -114,6 +140,18 @@
                   </label>
                 </div>
               </div>
+              <div class="field">
+                <div class="control">
+                  <label class="checkbox">
+                    <input
+                      type="checkbox"
+                      id="hide_from_history"
+                      name="hide_from_history"
+                    />
+                    履歴に表示させない
+                  </label>
+                </div>
+              </div>
               <div class="field is-grouped is-grouped-centered mt-4">
                 <div class="control">
                   <button type="submit" class="button is-primary is-fullwidth">
@@ -126,7 +164,7 @@
 
           {% if mosaic_image_url %}
           <section id="output-section" class="mt-5">
-            <h2 class="title is-4">プレイリスト情報</h2>
+            <h2 class="title is-4">ジャケット画像ができました！</h2>
             <p>
               <strong>プレイリスト名:</strong>
               <a
@@ -136,7 +174,16 @@
                 >{{ playlist_name }}</a
               >
             </p>
-            <p><strong>作成者:</strong> {{ playlist_owner }}</p>
+            <p>
+              <strong>作成者:</strong>
+              <a
+                href="{{ playlist_owner_link }}"
+                target="_blank"
+                class="has-text-link"
+                >{{ playlist_owner }}</a
+              >
+            </p>
+
             <figure class="image">
               <img
                 src="{{ mosaic_image_url }}"
@@ -148,19 +195,23 @@
           </section>
           {% endif %}
 
-          <section id="recent-images" class="box has-background-white-ter mb-5">
-            <h2 class="title is-4">直近の生成画像</h2>
+          <section
+            id="recent-images"
+            class="box has-background-white-ter mt-5 mb-5"
+          >
+            <h2 class="title is-4">みんなのジャケット</h2>
             {% if recent_images %}
-            <ul>
+            <ul id="recent-images-list">
               {% for image in recent_images %}
-              <li>
+              <li class="mt-5">
                 <strong>プレイリスト名:</strong>
                 <a href="{{ image.playlist_link }}" target="_blank"
                   >{{ image.playlist_name }}</a
-                >
-                <br />
-                <strong>作成者:</strong> {{ image.playlist_owner }}
-                <br />
+                ><br />
+                <strong>作成者:</strong>
+                <a href="{{ image.playlist_owner_link }}" target="_blank"
+                  >{{ image.playlist_owner }}</a
+                ><br />
                 <img
                   src="{{ image.image_url }}"
                   alt="Generated Image"
@@ -170,6 +221,16 @@
               </li>
               {% endfor %}
             </ul>
+            <div class="has-text-centered mt-4">
+              <button
+                id="load-more-btn"
+                class="button is-link is-outlined"
+                data-offset="5"
+                onclick="loadMore()"
+              >
+                もっと見る
+              </button>
+            </div>
             {% else %}
             <p>まだ画像が生成されていません。</p>
             {% endif %}

@@ -6,5 +6,7 @@ class PlaylistImage(db.Model):
     playlist_name = db.Column(db.String(255), nullable=False)
     playlist_link = db.Column(db.String(255), nullable=False)
     playlist_owner = db.Column(db.String(255), nullable=False)
+    playlist_owner_link = db.Column(db.String(255), nullable=False)  
     image_url = db.Column(db.String(255), nullable=False)
+    hide_from_history = db.Column(db.Boolean, default=False) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
