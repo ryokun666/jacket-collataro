@@ -179,14 +179,4 @@ def index():
     return redirect("https://jacket-collection.vercel.app/", code=302)
 
 if __name__ == '__main__':
-    with app.app_context():
-        from flask_migrate import upgrade
-        upgrade()
-
-    app.run(debug=True)
-    # アプリケーション起動時に自動的にマイグレーションを適用する
-    with app.app_context():
-        from flask_migrate import upgrade
-        upgrade()
-
     app.run(debug=True)
