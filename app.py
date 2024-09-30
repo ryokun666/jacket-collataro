@@ -121,56 +121,69 @@ def load_more_images():
     has_more = len(images) == 5  # 取得した画像が5つなら、さらにデータがある可能性がある
     return jsonify({'images': images, 'has_more': has_more})
 
+# @app.route('/', methods=['GET', 'POST'])
+# def index():
+#     playlist_name = None
+#     playlist_description = None
+#     playlist_owner = None
+#     playlist_owner_link = None
+#     playlist_link = None
+
+#     if request.method == 'POST':
+#         # フォームのデータを取得
+#         playlist_url = request.form['playlist_url']
+#         shuffle = 'shuffle' in request.form 
+#         remove_duplicates = 'remove_duplicates' in request.form
+#         hide_from_history = 'hide_from_history' in request.form
+        
+#         # プレイリスト画像の取得・作成
+#         images, playlist_name, playlist_description, playlist_owner, playlist_owner_link, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
+#         mosaic_image = create_square_mosaic(images, shuffle)
+#         mosaic_image_path = generate_unique_image_path()  # ユニークなファイルパスを生成
+#         mosaic_image.save(mosaic_image_path)
+        
+#         # データベースに保存
+#         playlist_image = PlaylistImage(
+#             playlist_name=playlist_name,
+#             playlist_link=playlist_link,
+#             playlist_owner=playlist_owner,
+#             playlist_owner_link=playlist_owner_link,  
+#             image_url=mosaic_image_path,
+#             hide_from_history=hide_from_history  # 非表示フラグを保存
+#         )
+#         db.session.add(playlist_image)
+#         db.session.commit()
+        
+#         # POST後のレスポンスに最新の履歴を反映
+#         recent_images = PlaylistImage.query.filter_by(hide_from_history=False).order_by(PlaylistImage.created_at.desc()).limit(5).all()
+#         response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_owner_link=playlist_owner_link, playlist_link=playlist_link, recent_images=recent_images))
+#         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+#         response.headers['Pragma'] = 'no-cache'
+#         response.headers['Expires'] = '0'
+#         return response
+
+#     # 非表示フラグが立っていないもののみ表示する
+#     recent_images = PlaylistImage.query.filter_by(hide_from_history=False).order_by(PlaylistImage.created_at.desc()).limit(5).all()
+#     response = make_response(render_template('index.html', recent_images=recent_images, mosaic_image_url=None, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_owner_link=playlist_owner_link, playlist_link=playlist_link))
+#     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+#     response.headers['Pragma'] = 'no-cache'
+#     response.headers['Expires'] = '0'
+#     return response
+
+# if __name__ == '__main__':
+
+from flask import Flask, request, render_template, make_response, jsonify, redirect
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    playlist_name = None
-    playlist_description = None
-    playlist_owner = None
-    playlist_owner_link = None
-    playlist_link = None
-
-    if request.method == 'POST':
-        # フォームのデータを取得
-        playlist_url = request.form['playlist_url']
-        shuffle = 'shuffle' in request.form 
-        remove_duplicates = 'remove_duplicates' in request.form
-        hide_from_history = 'hide_from_history' in request.form
-        
-        # プレイリスト画像の取得・作成
-        images, playlist_name, playlist_description, playlist_owner, playlist_owner_link, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
-        mosaic_image = create_square_mosaic(images, shuffle)
-        mosaic_image_path = generate_unique_image_path()  # ユニークなファイルパスを生成
-        mosaic_image.save(mosaic_image_path)
-        
-        # データベースに保存
-        playlist_image = PlaylistImage(
-            playlist_name=playlist_name,
-            playlist_link=playlist_link,
-            playlist_owner=playlist_owner,
-            playlist_owner_link=playlist_owner_link,  
-            image_url=mosaic_image_path,
-            hide_from_history=hide_from_history  # 非表示フラグを保存
-        )
-        db.session.add(playlist_image)
-        db.session.commit()
-        
-        # POST後のレスポンスに最新の履歴を反映
-        recent_images = PlaylistImage.query.filter_by(hide_from_history=False).order_by(PlaylistImage.created_at.desc()).limit(5).all()
-        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_owner_link=playlist_owner_link, playlist_link=playlist_link, recent_images=recent_images))
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
-
-    # 非表示フラグが立っていないもののみ表示する
-    recent_images = PlaylistImage.query.filter_by(hide_from_history=False).order_by(PlaylistImage.created_at.desc()).limit(5).all()
-    response = make_response(render_template('index.html', recent_images=recent_images, mosaic_image_url=None, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_owner_link=playlist_owner_link, playlist_link=playlist_link))
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+    return redirect("https://jacket-collection.vercel.app/", code=302)
 
 if __name__ == '__main__':
+    with app.app_context():
+        from flask_migrate import upgrade
+        upgrade()
+
+    app.run(debug=True)
     # アプリケーション起動時に自動的にマイグレーションを適用する
     with app.app_context():
         from flask_migrate import upgrade
