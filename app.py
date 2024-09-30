@@ -147,32 +147,41 @@ def create_square_mosaic(images, shuffle=False):
     return mosaic
 
 
+# @app.route('/', methods=['GET', 'POST'])
+# def index():
+#     playlist_name = None
+#     playlist_description = None
+#     playlist_owner = None
+#     playlist_link = None
+
+#     if request.method == 'POST':
+#         playlist_url = request.form['playlist_url']
+#         shuffle = 'shuffle' in request.form 
+#         remove_duplicates = 'remove_duplicates' in request.form
+#         images, playlist_name, playlist_description, playlist_owner, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
+#         mosaic_image = create_square_mosaic(images, shuffle)
+#         mosaic_image_path = 'static/mosaic_image.jpg'
+#         mosaic_image.save(mosaic_image_path)
+#         response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
+#         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+#         response.headers['Pragma'] = 'no-cache'
+#         response.headers['Expires'] = '0'
+#         return response
+
+#     response = make_response(render_template('index.html', mosaic_image_url=None, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
+#     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+#     response.headers['Pragma'] = 'no-cache'
+#     response.headers['Expires'] = '0'
+#     return response
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+from flask import Flask, request, render_template, make_response, jsonify, redirect
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    playlist_name = None
-    playlist_description = None
-    playlist_owner = None
-    playlist_link = None
-
-    if request.method == 'POST':
-        playlist_url = request.form['playlist_url']
-        shuffle = 'shuffle' in request.form 
-        remove_duplicates = 'remove_duplicates' in request.form
-        images, playlist_name, playlist_description, playlist_owner, playlist_link = get_playlist_images(playlist_url, remove_duplicates)
-        mosaic_image = create_square_mosaic(images, shuffle)
-        mosaic_image_path = 'static/mosaic_image.jpg'
-        mosaic_image.save(mosaic_image_path)
-        response = make_response(render_template('index.html', mosaic_image_url=mosaic_image_path, shuffle=shuffle, remove_duplicates=remove_duplicates, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        response.headers['Expires'] = '0'
-        return response
-
-    response = make_response(render_template('index.html', mosaic_image_url=None, shuffle=False, remove_duplicates=False, playlist_name=playlist_name, playlist_description=playlist_description, playlist_owner=playlist_owner, playlist_link=playlist_link))
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+    return redirect("https://jacket-collection.vercel.app/", code=302)
 
 if __name__ == '__main__':
     app.run(debug=True)
