@@ -4,142 +4,239 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ジャケットコラ太郎</title>
+
     <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="icon"
+      href="{{ url_for('static', filename='favicon.ico') }}?v=2"
+      type="image/x-icon"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
       rel="stylesheet"
     />
+
     <script>
-      async function showLoading() {
-        document.getElementById("loading").style.display = "block";
-        document.getElementById("loading-background").style.display = "block";
+      function showLoading() {
+        const button = document.querySelector('button[type="submit"]');
+        button.classList.add("is-loading");
+        button.disabled = true;
+        button.textContent = "作成中...";
       }
 
-      window.onload = function () {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("loading-background").style.display = "none";
-      };
+      function loadMore() {
+        const button = document.getElementById("load-more-btn");
+        const offset = button.getAttribute("data-offset");
+
+        fetch(`/load_more_images?offset=${offset}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const list = document.getElementById("recent-images-list");
+            data.images.forEach((image) => {
+              const listItem = document.createElement("li");
+              listItem.innerHTML = `
+                <strong>プレイリスト名:</strong>
+                <a href="${image.playlist_link}" target="_blank">${image.playlist_name}</a><br />
+                <strong>作成者:</strong>
+                <a href="${image.playlist_owner_link}" target="_blank">${image.playlist_owner}</a><br />
+                <img src="${image.image_url}" alt="Generated Image" class="box" style="width: 100%; height: auto; margin-top: 10px" />
+              `;
+              list.appendChild(listItem);
+            });
+
+            if (!data.has_more) {
+              button.style.display = "none";
+            } else {
+              button.setAttribute("data-offset", parseInt(offset) + 5);
+            }
+          });
+      }
     </script>
   </head>
-  <body
-    class="bg-gray-100 flex justify-center items-center flex-col text-center py-5"
-  >
-    <div
-      id="container"
-      class="w-full max-w-2xl p-5 bg-white rounded-lg shadow-lg overflow-hidden"
-    >
-      <header class="mb-5 text-center">
-        <h1>
-          <img
-            src="{{ url_for('static', filename='logo.png') }}"
-            alt="ジャケットコラ太郎ロゴ"
-            class="max-w-xs w-full h-auto mx-auto"
-          />
-        </h1>
-      </header>
-      <main>
-        <section id="instructions" class="mb-5 text-left">
-          <p class="text-center">◎使い方◎</p>
-          <ol class="list-inside list-decimal">
-            <li>
-              Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
-            </li>
-            <li>コピーしたURLを下の入力欄に貼り付けます。</li>
-            <li>「作成する」ボタンを押します。</li>
-            <li>コラージュ画像が生成されて表示されます。</li>
-          </ol>
-        </section>
-        <section id="form-section" class="bg-gray-50 p-5 rounded-lg shadow-md">
-          <form
-            method="POST"
-            onsubmit="showLoading()"
-            class="flex flex-col items-center w-full"
-          >
-            <label for="playlist_url" class="font-bold text-gray-600 mb-2"
-              >プレイリストのURLを入力してね。</label
-            >
-            <input
-              type="text"
-              id="playlist_url"
-              name="playlist_url"
-              required
-              class="w-full p-3 mb-5 border border-gray-300 rounded-md text-lg"
+  <body class="has-background-light">
+    <div class="container is-max-desktop p-5">
+      <div class="box">
+        <header class="has-text-centered mb-5">
+          <h1>
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="ジャケットコラ太郎ロゴ"
+              class="image is-inline-block"
+              style="max-width: 300px; height: auto"
             />
-            <div class="radio-group text-left w-full mb-3">
-              <div>
-                <input
-                  type="checkbox"
-                  id="shuffle"
-                  name="shuffle"
-                  class="mr-2"
-                  {%
-                  if
-                  shuffle
-                  %}checked{%
-                  endif
-                  %}
-                />
-                <label for="shuffle" class="text-gray-700"
-                  >ランダムに並び替える</label
-                >
-              </div>
-              <div class="check mt-4">
-                <input
-                  type="checkbox"
-                  id="remove_duplicates"
-                  name="remove_duplicates"
-                  class="mr-2"
-                  {%
-                  if
-                  remove_duplicates
-                  %}checked{%
-                  endif
-                  %}
-                />
-                <label for="remove_duplicates" class="text-gray-700"
-                  >重複を除く</label
-                >
-              </div>
+          </h1>
+        </header>
+        <main>
+          <details id="instructions" class="mb-5">
+            <summary class="is-size-4 has-text-centered">使い方をみる</summary>
+            <div class="is-size-5">
+              Spotifyのプレイリスト内の楽曲のジャケットを1枚の画像にまとめます！
             </div>
-            <button
-              type="submit"
-              class="fancy-button px-5 py-3 mt-4 bg-blue-600 text-white rounded-full text-lg shadow-md transition-transform transform hover:bg-blue-700 hover:-translate-y-1"
-            >
-              作成する
-            </button>
-          </form>
-        </section>
-        <div
-          id="loading-background"
-          class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden"
-        ></div>
-        <div
-          id="loading"
-          class="fixed inset-0 flex items-center justify-center h-screen text-white text-4xl font-bold z-20 hidden"
-        >
-          作成中・・・
-        </div>
-
-        {% if mosaic_image_url %}
-        <section id="output-section" class="mt-5">
-          <h2 class="text-2xl text-gray-700 mb-2">プレイリスト情報</h2>
-          <p>
-            <strong>プレイリスト名:</strong>
+            <ol class="ml-5 is-size-5">
+              <li>
+                Spotifyでコラージュ画像を作りたいプレイリストのURLをコピーします。
+              </li>
+              <li>コピーしたURLを下の入力欄に貼り付けます。</li>
+              <li>「作成する」ボタンを押します。</li>
+              <li>コラージュ画像が生成されて表示されます。</li>
+            </ol>
+          </details>
+          <div class="has-text-centered mt-5 mb-5">
             <a
-              href="{{ playlist_link }}"
+              href="https://forms.gle/8NnhvSUX2HwvVX8p6"
+              class="button is-link is-outlined"
               target="_blank"
-              class="text-blue-600 hover:underline"
-              >{{ playlist_name }}</a
+              >お問い合わせ</a
             >
-          </p>
-          <p><strong>作成者:</strong> {{ playlist_owner }}</p>
-          <img
-            src="{{ mosaic_image_url }}"
-            alt="Collage Image"
-            class="output-img mt-5 border border-gray-300 rounded-lg shadow-md max-w-xs w-full h-auto mx-auto"
-          />
-        </section>
-        {% endif %}
-      </main>
+          </div>
+          <section id="form-section" class="box has-background-white-ter mb-5">
+            <form method="POST" onsubmit="showLoading()">
+              <div class="field">
+                <label for="playlist_url" class="label"
+                  >プレイリストのURLを入力してね。</label
+                >
+                <div class="control">
+                  <input
+                    type="text"
+                    id="playlist_url"
+                    name="playlist_url"
+                    required
+                    class="input"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <label class="checkbox">
+                    <input
+                      type="checkbox"
+                      id="shuffle"
+                      name="shuffle"
+                      {%
+                      if
+                      shuffle
+                      %}checked{%
+                      endif
+                      %}
+                    />
+                    ランダムに並び替える
+                  </label>
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <label class="checkbox">
+                    <input
+                      type="checkbox"
+                      id="remove_duplicates"
+                      name="remove_duplicates"
+                      {%
+                      if
+                      remove_duplicates
+                      %}checked{%
+                      endif
+                      %}
+                    />
+                    重複を除く
+                  </label>
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <label class="checkbox">
+                    <input
+                      type="checkbox"
+                      id="hide_from_history"
+                      name="hide_from_history"
+                    />
+                    履歴に表示させない
+                  </label>
+                </div>
+              </div>
+              <div class="field is-grouped is-grouped-centered mt-4">
+                <div class="control">
+                  <button type="submit" class="button is-primary is-fullwidth">
+                    作成する
+                  </button>
+                </div>
+              </div>
+            </form>
+          </section>
+
+          {% if mosaic_image_url %}
+          <section id="output-section" class="mt-5">
+            <h2 class="title is-4">ジャケット画像ができました！</h2>
+            <p>
+              <strong>プレイリスト名:</strong>
+              <a
+                href="{{ playlist_link }}"
+                target="_blank"
+                class="has-text-link"
+                >{{ playlist_name }}</a
+              >
+            </p>
+            <p>
+              <strong>作成者:</strong>
+              <a
+                href="{{ playlist_owner_link }}"
+                target="_blank"
+                class="has-text-link"
+                >{{ playlist_owner }}</a
+              >
+            </p>
+
+            <figure class="image">
+              <img
+                src="{{ mosaic_image_url }}"
+                alt="Collage Image"
+                class="box"
+                style="width: 100%; height: auto"
+              />
+            </figure>
+          </section>
+          {% endif %}
+
+          <section
+            id="recent-images"
+            class="box has-background-white-ter mt-5 mb-5"
+          >
+            <h2 class="title is-4">みんなのジャケット</h2>
+            {% if recent_images %}
+            <ul id="recent-images-list">
+              {% for image in recent_images %}
+              <li class="mt-5">
+                <strong>プレイリスト名:</strong>
+                <a href="{{ image.playlist_link }}" target="_blank"
+                  >{{ image.playlist_name }}</a
+                ><br />
+                <strong>作成者:</strong>
+                <a href="{{ image.playlist_owner_link }}" target="_blank"
+                  >{{ image.playlist_owner }}</a
+                ><br />
+                <img
+                  src="{{ image.image_url }}"
+                  alt="Generated Image"
+                  class="box"
+                  style="width: 100%; height: auto; margin-top: 10px"
+                />
+              </li>
+              {% endfor %}
+            </ul>
+            <div class="has-text-centered mt-4">
+              <button
+                id="load-more-btn"
+                class="button is-link is-outlined"
+                data-offset="5"
+                onclick="loadMore()"
+              >
+                もっと見る
+              </button>
+            </div>
+            {% else %}
+            <p>まだ画像が生成されていません。</p>
+            {% endif %}
+          </section>
+        </main>
+      </div>
     </div>
   </body>
 </html>
