@@ -5,3 +5,5 @@ Pillow
 python-dotenv
 gunicorn
 gevent>=1.4
+flask-migrate
+psycopg2-binary
